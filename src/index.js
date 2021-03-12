@@ -9,12 +9,30 @@ import {useFileUpload} from './component/useFileUpload'
 
 const OnDrop = () => <span>Drop here</span>
 const Beforedrop = () => <span>Drop the file or click here to select</span>
+const [acceptableExtensions, acceptableSize] = [['pdf', 'jpeg', 'jpg'], 5]
+
+const FilesValidation = (files, newFiles) => {
+  let validFiles = []
+  for (const file of newFiles) {
+    if (
+      (!acceptableExtensions ||
+        acceptableExtensions.includes(
+          file.name.split('.').pop().toLowerCase(),
+        )) &&
+      (!acceptableSize || acceptableSize * 1024 * 1024 > file.size)
+    ) {
+      validFiles.push(file)
+    }
+  }
+  return validFiles
+}
 
 const FileUpload = () => {
   const [{drag, files}, getDragDropContainerProps] = useFileUpload({
     multiple: true,
     acceptableExtensions: ['pdf', 'jpeg', 'jpg'],
     fileCountLimit: 3,
+    customValidation: FilesValidation,
   })
   console.log('files,', files)
   return (

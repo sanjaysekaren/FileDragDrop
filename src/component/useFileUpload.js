@@ -39,21 +39,24 @@ const dragDropReducer = (state, action) => {
   }
 }
 
-const isValidFiles = (state, dispatch, newFiles) => {
+const isValidFiles = (state, dispatch, newFiles, props) => {
   // pending validation here
-  return true
+  if (props?.customValidation) {
+    return props.customValidation(state.files, newFiles)
+  }
+  return newFiles
 }
 
-const handleFiles = (state, dispatch, newFiles) => {
-  const isValid = isValidFiles(state, dispatch, newFiles)
-  if (isValid) {
-    dispatch({type: actionTypes.ADD_FILES, payload: newFiles})
+const handleFiles = (state, dispatch, newFiles, props) => {
+  const validFiles = isValidFiles(state, dispatch, newFiles, props)
+  if (validFiles.length) {
+    dispatch({type: actionTypes.ADD_FILES, payload: validFiles})
   }
 }
 
 export const defaultStyle = {
-  width: '100%',
-  height: '100%',
+  width: '200px',
+  height: '200px',
   border: '0.05rem dashed gray',
   borderRadius: '0.2rem',
 }
@@ -81,7 +84,7 @@ export const useFileUpload = ({reducer = dragDropReducer, ...props} = {}) => {
     const {dataTransfer} = event
     dispatch({type: actionTypes.FILE_DROPPED})
     if (dataTransfer?.items?.length) {
-      handleFiles(state, dispatch, dataTransfer.files)
+      handleFiles(state, dispatch, dataTransfer.files, props)
       dataTransfer.clearData()
     }
   }
