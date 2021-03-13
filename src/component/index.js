@@ -1,1 +1,5 @@
-export { default as FileDragDropCompoenent} from './FileDragDrop';
+export {
+  default as useFileUpload,
+  actionTypes,
+  dragDropReducer,
+} from './useFileUpload'
