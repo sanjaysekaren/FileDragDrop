@@ -2,7 +2,8 @@ import {useReducer, useRef} from 'react'
 
 const callfn = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
-export const DEFAULT_EXTENSIONS = ['jpeg', 'jpg']
+const DEFAULT_EXTENSIONS = ['jpeg', 'jpg']
+const FILE = 'file'
 
 export const actionTypes = {
   FILE_DRAGGED: 'FILE_DRAGGED',
@@ -10,22 +11,24 @@ export const actionTypes = {
   ADD_FILES: 'ADD_FILES',
 }
 
+const fileAttrId = 'file-input'
+
 const preventNavigation = event => {
   event.preventDefault()
   event.stopPropagation()
 }
 
-const dragDropReducer = (state, action) => {
+export const dragDropReducer = (state, action) => {
   switch (action.type) {
     case actionTypes.FILE_DRAGGED:
       return {
         ...state,
-        drag: true,
+        isDragging: true,
       }
     case actionTypes.FILE_DROPPED:
       return {
         ...state,
-        drag: false,
+        isDragging: false,
       }
     case actionTypes.ADD_FILES:
       return {
@@ -34,7 +37,7 @@ const dragDropReducer = (state, action) => {
       }
     default:
       return {
-        drag: false,
+        isDragging: false,
       }
   }
 }
@@ -51,7 +54,7 @@ const handleFiles = (state, dispatch, newFiles) => {
   }
 }
 
-export const defaultStyle = {
+const defaultStyle = {
   width: '100%',
   height: '100%',
   border: '0.05rem dashed gray',
@@ -65,8 +68,12 @@ const defaultState = {
   acceptableExtensions: DEFAULT_EXTENSIONS,
 }
 
-export const useFileUpload = ({reducer = dragDropReducer, ...props} = {}) => {
+export default function useFileUpload({
+  reducer = dragDropReducer,
+  ...props
+} = {}) {
   const {current: initialState} = useRef({...defaultState, ...props})
+  const fileInput = useRef(null)
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const onDragEnterEvent = event => {
@@ -79,21 +86,28 @@ export const useFileUpload = ({reducer = dragDropReducer, ...props} = {}) => {
 
   const onDropEvent = event => {
     const {dataTransfer} = event
-    dispatch({type: actionTypes.FILE_DROPPED})
     if (dataTransfer?.items?.length) {
+      dispatch({type: actionTypes.FILE_DROPPED})
       handleFiles(state, dispatch, dataTransfer.files)
       dataTransfer.clearData()
     }
   }
+
+  const register = ref => (fileInput.current = ref)
+
+  const onClickEvent = ({target}) =>
+    fileAttrId !== target.dataset.id && fileInput.current.click()
+
   const getDragDropContainerProps = ({
     onDragOver,
     onDragEnter,
     onDragLeave,
     onDrop,
-    customStyle,
+    customStyle = {},
     ...props
   }) => {
     return {
+      onClick: onClickEvent,
       onDragOver: callfn(preventNavigation, onDragOver),
       onDragEnter: callfn(preventNavigation, onDragEnterEvent, onDragEnter),
       onDragLeave: callfn(preventNavigation, onDragLeaveEvent, onDragLeave),
@@ -105,5 +119,22 @@ export const useFileUpload = ({reducer = dragDropReducer, ...props} = {}) => {
       ...props,
     }
   }
-  return [state, getDragDropContainerProps]
+
+  const getInputProps = ({
+    onClick,
+    onChange,
+    customStyle = {},
+    ...props
+  } = {}) => {
+    return {
+      'data-id': fileAttrId,
+      type: FILE,
+      name: FILE,
+      ...props,
+      style: {
+        ...customStyle,
+      },
+    }
+  }
+  return [state, register, getDragDropContainerProps, getInputProps]
 }
