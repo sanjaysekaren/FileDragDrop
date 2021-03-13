@@ -11,11 +11,12 @@ const onSubmit = e => {
 }
 const FileUpload = () => {
   const [
-    {isDragging},
+    {isDragging, files},
     register,
     getDragDropContainerProps,
     getInputProps,
   ] = useFileUpload()
+  console.log(files, 'files')
   return (
     <form onSubmit={onSubmit} action="">
       <div
@@ -28,10 +29,13 @@ const FileUpload = () => {
         <input
           ref={register}
           {...getInputProps({
-            name: 'file',
+            name: 'images',
             multiple: true,
             acceptableextensions: ['pdf', 'jpeg', 'jpg'],
             filecountlimit: 3,
+            onChange: event => {
+              console.log(event)
+            },
           })}
         />
         {isDragging ? <OnDrop /> : <Beforedrop />}

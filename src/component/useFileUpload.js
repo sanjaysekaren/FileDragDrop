@@ -42,13 +42,14 @@ export const dragDropReducer = (state, action) => {
   }
 }
 
-const isValidFiles = (state, dispatch, newFiles) => {
+const isValidFiles = newFiles => {
   // pending validation here
   return true
 }
 
 const handleFiles = (state, dispatch, newFiles) => {
-  const isValid = isValidFiles(state, dispatch, newFiles)
+  console.log(newFiles, 'newFiles')
+  const isValid = isValidFiles(newFiles)
   if (isValid) {
     dispatch({type: actionTypes.ADD_FILES, payload: newFiles})
   }
@@ -68,18 +69,22 @@ const defaultState = {
   acceptableExtensions: DEFAULT_EXTENSIONS,
 }
 
+const simpleAction = (type, dispatch) => dispatch({type})
+
 export default function useFileUpload({
   reducer = dragDropReducer,
+  validate,
   ...props
 } = {}) {
   const {current: initialState} = useRef({...defaultState, ...props})
-  const fileInput = useRef(null)
+  const fileRef = useRef(null)
   const [state, dispatch] = useReducer(reducer, initialState)
 
+  const register = ref => (fileRef.current = ref)
+
   const onDragEnterEvent = event => {
-    if (event.dataTransfer?.items?.length) {
-      dispatch({type: actionTypes.FILE_DRAGGED})
-    }
+    if (event.dataTransfer?.items?.length)
+      simpleAction(actionTypes.FILE_DRAGGED, dispatch)
   }
 
   const onDragLeaveEvent = _ => dispatch({type: actionTypes.FILE_DROPPED})
@@ -87,16 +92,17 @@ export default function useFileUpload({
   const onDropEvent = event => {
     const {dataTransfer} = event
     if (dataTransfer?.items?.length) {
-      dispatch({type: actionTypes.FILE_DROPPED})
+      simpleAction(actionTypes.FILE_DROPPED, dispatch)
       handleFiles(state, dispatch, dataTransfer.files)
       dataTransfer.clearData()
     }
   }
 
-  const register = ref => (fileInput.current = ref)
-
   const onClickEvent = ({target}) =>
-    fileAttrId !== target.dataset.id && fileInput.current.click()
+    fileAttrId !== target.dataset?.id && fileRef.current.click()
+
+  const onChangeEvent = event =>
+    handleFiles(state, dispatch, event.target.files)
 
   const getDragDropContainerProps = ({
     onDragOver,
@@ -124,12 +130,14 @@ export default function useFileUpload({
     onClick,
     onChange,
     customStyle = {},
+    type,
     ...props
   } = {}) => {
     return {
       'data-id': fileAttrId,
       type: FILE,
       name: FILE,
+      onChange: callfn(onChangeEvent, onChange),
       ...props,
       style: {
         ...customStyle,
