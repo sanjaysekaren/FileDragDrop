@@ -15,29 +15,17 @@ const FileUpload = () => {
     register,
     getDragDropContainerProps,
     getInputProps,
-  ] = useFileUpload()
+  ] = useFileUpload({
+    multiple: false,
+    acceptableextensions: ['pdf', 'jpeg', 'jpg'],
+    filecountlimit: 3,
+  })
+
   console.log(files, 'files')
   return (
     <form onSubmit={onSubmit} action="">
-      <div
-        {...getDragDropContainerProps({
-          customStyle: {
-            backgroundColor: '#ccc',
-          },
-        })}
-      >
-        <input
-          ref={register}
-          {...getInputProps({
-            name: 'images',
-            multiple: true,
-            acceptableextensions: ['pdf', 'jpeg', 'jpg'],
-            filecountlimit: 3,
-            onChange: event => {
-              console.log(event)
-            },
-          })}
-        />
+      <div {...getDragDropContainerProps()}>
+        <input ref={register} {...getInputProps()} />
         {isDragging ? <OnDrop /> : <Beforedrop />}
       </div>
     </form>
