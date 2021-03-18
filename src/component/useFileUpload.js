@@ -1,10 +1,10 @@
-import React, {useReducer, useRef} from 'react'
-import ReactDOM from 'react-dom'
+import {useEffect, useReducer, useRef, useCallback} from 'react'
 
 const callfn = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
-const DEFAULT_EXTENSIONS = ['jpeg', 'jpg']
+const DEFAULT_EXTENSIONS = []
 const FILE = 'file'
+const ERROR = 'error'
 
 export const actionTypes = {
   FILE_DRAGGED: 'FILE_DRAGGED',
@@ -14,10 +14,7 @@ export const actionTypes = {
 
 const fileAttrId = 'file-input'
 
-const preventNavigation = event => {
-  event.preventDefault()
-  event.stopPropagation()
-}
+const preventNavigation = event => event.preventDefault()
 
 export const dragDropReducer = (state, action) => {
   switch (action.type) {
@@ -43,19 +40,6 @@ export const dragDropReducer = (state, action) => {
   }
 }
 
-const isValidFiles = newFiles => {
-  // pending validation here
-  return true
-}
-
-const handleFiles = (state, dispatch, newFiles) => {
-  console.log(newFiles, 'newFiles')
-  const isValid = isValidFiles(newFiles)
-  if (isValid) {
-    dispatch({type: actionTypes.ADD_FILES, payload: newFiles})
-  }
-}
-
 const defaultStyle = {
   width: '100%',
   height: '100%',
@@ -67,96 +51,151 @@ const defaultState = {
   files: [],
   errors: {},
   multiple: false,
-  acceptableExtensions: DEFAULT_EXTENSIONS,
+  acceptableextensions: DEFAULT_EXTENSIONS,
+  filecountlimit: 0,
 }
 
 const simpleAction = (type, dispatch) => dispatch({type})
 
-export default function useFileUpload({
+export function useFileUpload({
   reducer = dragDropReducer,
+  customValidation = () => {},
   validate,
   ...props
 } = {}) {
   const {current: initialState} = useRef({...defaultState, ...props})
   const fileRef = useRef(null)
   const [state, dispatch] = useReducer(reducer, initialState)
-
+  const {files, multiple, filecountlimit, acceptableextensions} = state
   const register = ref => (fileRef.current = ref)
 
-  const onDragEnterEvent = event => {
-    if (event.dataTransfer?.items?.length)
-      simpleAction(actionTypes.FILE_DRAGGED, dispatch)
-  }
-
-  const onDragLeaveEvent = _ => dispatch({type: actionTypes.FILE_DROPPED})
-
-  const onDropEvent = event => {
-    const {dataTransfer} = event
-    if (dataTransfer?.items?.length) {
-      simpleAction(actionTypes.FILE_DROPPED, dispatch)
-      handleFiles(state, dispatch, dataTransfer.files)
-      dataTransfer.clearData()
-    }
-  }
-  
-  const inputElement = React.createElement(
-    'div',
-    {},
-    React.createElement(
-      'label',
-      {},
-      React.createElement('input', {type: 'file'}),
-    ),
+  const fileExtensionValidation = useCallback(
+    file => {
+      file[ERROR] = ''
+      if (
+        acceptableextensions.length &&
+        !acceptableextensions.includes(file.name.split('.').pop().toLowerCase())
+      ) {
+        file[ERROR] = 'Invalid file extensions'
+      }
+      return file
+    },
+    [acceptableextensions],
   )
 
-  const onClickEvent = ({target}) => {
-    console.log('entered', target)
-    fileAttrId !== target.dataset?.id && fileRef.current?.click()
-    ReactDOM.render(inputElement, document.getElementById('dropContainer'))
-  }
+  const validateFileInput = useCallback(
+    file => {
+      const validators = []
+      validators.push(customValidation)
+      if (acceptableextensions.length) {
+        validators.push(fileExtensionValidation)
+      }
+      validators.map(validate => !file[ERROR] && validate(file))
+    },
+    [customValidation, fileExtensionValidation, acceptableextensions],
+  )
 
-  const onChangeEvent = event =>
-    handleFiles(state, dispatch, event.target.files)
+  const onDragEnterEvent = useCallback(event => {
+    if (event.dataTransfer?.items?.length)
+      simpleAction(actionTypes.FILE_DRAGGED, dispatch)
+  }, [])
 
-  const getDragDropContainerProps = ({
-    onDragOver,
-    onDragEnter,
-    onDragLeave,
-    onDrop,
-    customStyle = {},
-    ...props
-  }) => {
-    return {
-      onClick: onClickEvent,
-      onDragOver: callfn(preventNavigation, onDragOver),
-      onDragEnter: callfn(preventNavigation, onDragEnterEvent, onDragEnter),
-      onDragLeave: callfn(preventNavigation, onDragLeaveEvent, onDragLeave),
-      onDrop: callfn(preventNavigation, onDropEvent, onDrop),
-      style: {
-        ...defaultStyle,
-        ...customStyle,
-      },
-      ...props,
-    }
-  }
+  const handleFiles = useCallback(
+    newFiles => dispatch({type: actionTypes.ADD_FILES, payload: newFiles}),
+    [],
+  )
 
-  const getInputProps = ({
-    onClick,
-    onChange,
-    customStyle = {},
-    type,
-    ...props
-  } = {}) => {
-    return {
-      'data-id': fileAttrId,
-      type: FILE,
-      name: FILE,
-      onChange: callfn(onChangeEvent, onChange),
-      ...props,
-      style: {
-        ...customStyle,
-      },
-    }
-  }
+  const onDragLeaveEvent = useCallback(
+    () => dispatch({type: actionTypes.FILE_DROPPED}),
+    [],
+  )
+
+  const applyUserProvidedSlices = useCallback(
+    files => {
+      let filePayload = []
+      if (multiple) {
+        if (filecountlimit) {
+          filePayload = [files.slice(0, filecountlimit)]
+        } else {
+          filePayload = [files]
+        }
+      } else {
+        filePayload = [files[0]]
+      }
+      return filePayload
+    },
+    [multiple, filecountlimit],
+  )
+
+  const onDropEvent = useCallback(
+    event => {
+      const {dataTransfer} = event
+      if (dataTransfer?.items?.length) {
+        simpleAction(actionTypes.FILE_DROPPED, dispatch)
+        handleFiles(applyUserProvidedSlices(dataTransfer.files))
+        dataTransfer.clearData()
+      }
+    },
+    [handleFiles, applyUserProvidedSlices],
+  )
+
+  const onClickEvent = useCallback(
+    ({target}) => fileAttrId !== target.dataset?.id && fileRef.current?.click(),
+    [],
+  )
+
+  const onChangeEvent = useCallback(event => handleFiles(event.target.files), [
+    handleFiles,
+  ])
+
+  const getDragDropContainerProps = useCallback(
+    ({
+      onDragOver,
+      onDragEnter,
+      onDragLeave,
+      onDrop,
+      id,
+      customStyle = {},
+      ...props
+    } = {}) => {
+      return {
+        onClick: onClickEvent,
+        onDragOver: callfn(preventNavigation, onDragOver),
+        onDragEnter: callfn(preventNavigation, onDragEnterEvent, onDragEnter),
+        onDragLeave: callfn(preventNavigation, onDragLeaveEvent, onDragLeave),
+        onDrop: callfn(preventNavigation, onDropEvent, onDrop),
+        style: {
+          ...defaultStyle,
+          ...customStyle,
+        },
+        ...props,
+      }
+    },
+    [onClickEvent, onDragEnterEvent, onDragLeaveEvent, onDropEvent],
+  )
+
+  const getInputProps = useCallback(
+    ({onClick, onChange, customStyle = {}, type, ...props} = {}) => {
+      return {
+        'data-id': fileAttrId,
+        type: FILE,
+        name: FILE,
+        multiple,
+        acceptableextensions,
+        filecountlimit,
+        onChange: callfn(onChangeEvent, onChange),
+        ...props,
+        style: {
+          ...customStyle,
+        },
+      }
+    },
+    [multiple, acceptableextensions, filecountlimit, onChangeEvent],
+  )
+
+  useEffect(() => {
+    files.length && files.map(file => validateFileInput(file))
+  }, [files, validateFileInput])
+
   return [state, register, getDragDropContainerProps, getInputProps]
 }

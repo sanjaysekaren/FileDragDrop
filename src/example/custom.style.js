@@ -71,7 +71,7 @@ export const logoStyle = {
   display: 'block',
   width: '100px',
   height: '100px',
-  margin: '10% 38%',
+  margin: '1% 38%',
   textAlign: 'center',
 }
 
@@ -79,7 +79,8 @@ export const dropText = {
   fontSize: '1em',
   fontWeight: 'Bolder',
   textAlign: 'center',
-  width: '100px',
+  width: '180px',
   color: '#4e9af1',
   fontFamily: 'serif',
+  margin: '2% 32%'
 }

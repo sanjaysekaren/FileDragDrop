@@ -8,7 +8,6 @@ import {
   Title,
   TextField,
   SubmitButton,
-  FileContainer,
   logoStyle,
   dropText,
 } from './custom.style'
@@ -36,41 +35,45 @@ const UserForm = () => {
         </FieldWrapper>
         <FieldWrapper>
           <Label>Upload Proof</Label>
-          <FieldWrapper id='dropContainer'
+          <FieldWrapper
+            id="dropContainer"
             {...getDragDropContainerProps({
               customStyle: {
-                backgroundColor: '#ccc',
+                backgroundColor: '#ffffff',
+                width: '450px',
+                height: '200px',
+                margin: '2% 30%',
               },
             })}
           >
-            {/* <label> */}
-            {/* <img style={logoStyle} key={'icon'} src={logo} /> */}
-            {/* <input
-              ref={register}
-              {...getInputProps({
-                name: 'images',
-                multiple: true,
-                acceptableextensions: ['pdf', 'jpeg', 'jpg'],
-                customStyle: {
-                  visibility: 'hidden',
-                },
-              })}
-            /> */}
-            {/* </label> */}
+            <label>
+              <img alt='logo' style={logoStyle} key={'icon'} src={logo} />
+              <input
+                ref={register}
+                {...getInputProps({
+                  name: 'images',
+                  multiple: true,
+                  acceptableextensions: ['pdf', 'jpeg', 'jpg'],
+                  customStyle: {
+                    visibility: 'hidden',
+                  },
+                })}
+              />
+            </label>
             {/* <input style={{display:'none'}} type='file' ref={register} onChange={handleFiles}/> */}
-            <span style={dropText}>
+            <div style={dropText}>
               {isDragging ? 'Drop here' : 'Select or Drop a file'}
-            </span>
+            </div>
           </FieldWrapper>
         </FieldWrapper>
         {files &&
           files.map(file => (
             <img
               className="preview"
+              alt={file.name}
               style={{display: 'block', width: '150px', height: '200px'}}
               key={file.name}
               src={URL.createObjectURL(file)}
-              alt={file.name}
             />
           ))}
         <FieldWrapper>
