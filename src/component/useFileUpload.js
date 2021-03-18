@@ -41,10 +41,10 @@ export const dragDropReducer = (state, action) => {
 }
 
 const defaultStyle = {
-  width: '100%',
-  height: '100%',
-  border: '0.05rem dashed gray',
-  borderRadius: '0.2rem',
+  width: '250px',
+  height: '400px',
+  border: '1px dashed gray',
+  borderRadius: '3px',
 }
 
 const defaultState = {

@@ -2,7 +2,7 @@ import styled from 'styled-components'
 
 export const TextField = styled.input.attrs(props => ({
   type: 'text',
-  size: props.size || '1em',
+  size: props.size || '16px',
 }))`
   border: 2px solid #4e9af1;
   width: 300px;
@@ -13,7 +13,7 @@ export const TextField = styled.input.attrs(props => ({
 `
 
 export const Label = styled.label`
-  font-size: 1em;
+  font-size: 16px;
   text-align: left;
   width: 100px;
   padding: 5px 22px;
@@ -25,10 +25,10 @@ export const SubmitButton = styled.button`
   width: 180px;
   height: 50px;
   display: inline-block;
-   padding: 0.3em 1.2em;
-   margin: 0 0.1em 0.1em 0;
-   border: 0.16em solid rgba(255, 255, 255, 0);
-   border-radius: 2em;
+   padding: 5px 20px;
+   margin: 0 2px 2px 0;
+   border: 3px solid rgba(255, 255, 255, 0);
+   border-radius: 32px;
    box-sizing: border-box;
    text-decoration: none;
    font-family: 'Roboto', sans-serif;
@@ -41,7 +41,7 @@ export const SubmitButton = styled.button`
   }
 `
 export const Title = styled.h1`
-  font-size: 3em;
+  font-size: 48px;
   text-align: center;
   color: #4e9af1;
   font-family: Georgia, serif;
@@ -63,8 +63,8 @@ export const FileContainer = {
   width: '400px',
   height: '200px',
   backgroundColor: '#ffffff',
-  border: '0.25rem dashed #99ffcc',
-  borderRadius: '0.6rem',
+  border: '4px dashed #99ffcc',
+  borderRadius: '10px',
 }
 
 export const logoStyle = {
@@ -76,7 +76,7 @@ export const logoStyle = {
 }
 
 export const dropText = {
-  fontSize: '1em',
+  fontSize: '16px',
   fontWeight: 'Bolder',
   textAlign: 'center',
   width: '180px',
