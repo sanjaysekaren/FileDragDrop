@@ -1,5 +1,1 @@
-export {
-  default as useFileUpload,
-  actionTypes,
-  dragDropReducer,
-} from './useFileUpload'
+export * from './useFileUpload'
