@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import {useFileUpload} from './component'
+import UserForm from './example'
 
 const OnDrop = () => <span>Drop here</span>
 const Beforedrop = () => <span>Drop the file or click here to select</span>
@@ -47,7 +48,8 @@ const FileUpload = () => {
 ReactDOM.render(
   <React.StrictMode>
     <>
-      <FileUpload />
+      {/* <FileUpload /> */}
+      <UserForm />
     </>
   </React.StrictMode>,
   document.getElementById('root'),

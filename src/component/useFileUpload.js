@@ -1,4 +1,5 @@
-import {useReducer, useRef} from 'react'
+import React, {useReducer, useRef} from 'react'
+import ReactDOM from 'react-dom'
 
 const callfn = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
@@ -97,9 +98,22 @@ export default function useFileUpload({
       dataTransfer.clearData()
     }
   }
+  
+  const inputElement = React.createElement(
+    'div',
+    {},
+    React.createElement(
+      'label',
+      {},
+      React.createElement('input', {type: 'file'}),
+    ),
+  )
 
-  const onClickEvent = ({target}) =>
-    fileAttrId !== target.dataset?.id && fileRef.current.click()
+  const onClickEvent = ({target}) => {
+    console.log('entered', target)
+    fileAttrId !== target.dataset?.id && fileRef.current?.click()
+    ReactDOM.render(inputElement, document.getElementById('dropContainer'))
+  }
 
   const onChangeEvent = event =>
     handleFiles(state, dispatch, event.target.files)
