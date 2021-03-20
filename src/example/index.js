@@ -12,14 +12,30 @@ import {
   dropText,
 } from './custom.style'
 
+const validateFiles = file => {
+  file['error'] = ''
+  return file
+}
+
 const UserForm = () => {
   const [
     {isDragging, files},
     register,
     getDragDropContainerProps,
     getInputProps,
-  ] = useFileUpload()
-  console.log(files, files[0], files[1], typeof files, typeof files[0])
+    previewFiles,
+  ] = useFileUpload({
+    customValidation: validateFiles,
+    multiple: true,
+    filecountlimit: 3,
+    acceptableextensions: ['pdf', 'jpg', 'jpeg'],
+    previewCustomStyle: {
+      display: 'block',
+      width: '150px',
+      height: '200px',
+      margin: '5px',
+    },
+  })
 
   return (
     <div>
@@ -47,7 +63,7 @@ const UserForm = () => {
             })}
           >
             <label>
-              <img alt='logo' style={logoStyle} key={'icon'} src={logo} />
+              <img alt="logo" style={logoStyle} key={'icon'} src={logo} />
               <input
                 ref={register}
                 {...getInputProps({
@@ -60,22 +76,12 @@ const UserForm = () => {
                 })}
               />
             </label>
-            {/* <input style={{display:'none'}} type='file' ref={register} onChange={handleFiles}/> */}
             <div style={dropText}>
               {isDragging ? 'Drop here' : 'Select or Drop a file'}
             </div>
           </FieldWrapper>
         </FieldWrapper>
-        {files &&
-          files.map(file => (
-            <img
-              className="preview"
-              alt={file.name}
-              style={{display: 'block', width: '150px', height: '200px'}}
-              key={file.name}
-              src={URL.createObjectURL(file)}
-            />
-          ))}
+        {previewFiles && previewFiles}
         <FieldWrapper>
           <SubmitButton>Submit</SubmitButton>
         </FieldWrapper>

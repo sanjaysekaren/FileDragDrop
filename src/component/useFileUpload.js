@@ -1,4 +1,5 @@
-import {useEffect, useReducer, useRef, useCallback} from 'react'
+import {useReducer, useRef, useCallback} from 'react'
+import {usePreviewFiles} from '../utlis/preview'
 
 const callfn = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
@@ -31,7 +32,10 @@ export const dragDropReducer = (state, action) => {
     case actionTypes.ADD_FILES:
       return {
         ...state,
-        files: [...state.files, ...action.payload],
+        files: [
+          ...state.files,
+          ...action.payload.slice(0, state.filecountlimit - state.files.length),
+        ],
       }
     default:
       return {
@@ -60,14 +64,25 @@ const simpleAction = (type, dispatch) => dispatch({type})
 export function useFileUpload({
   reducer = dragDropReducer,
   customValidation = () => {},
-  validate,
   ...props
 } = {}) {
   const {current: initialState} = useRef({...defaultState, ...props})
   const fileRef = useRef(null)
   const [state, dispatch] = useReducer(reducer, initialState)
-  const {files, multiple, filecountlimit, acceptableextensions} = state
+  const {
+    files,
+    multiple,
+    filecountlimit,
+    acceptableextensions,
+    previewCustomStyle,
+  } = state
   const register = ref => (fileRef.current = ref)
+  const {previewFiles} = usePreviewFiles(files, previewCustomStyle)
+
+  const applyUserProvidedSlices = useCallback(
+    newFiles => (multiple ? newFiles : [newFiles[0]]),
+    [multiple],
+  )
 
   const fileExtensionValidation = useCallback(
     file => {
@@ -84,15 +99,27 @@ export function useFileUpload({
   )
 
   const validateFileInput = useCallback(
-    file => {
+    files => {
+      let filteredFiles = []
       const validators = []
       validators.push(customValidation)
       if (acceptableextensions.length) {
         validators.push(fileExtensionValidation)
       }
-      validators.map(validate => !file[ERROR] && validate(file))
+      files?.map(file => {
+        validators.map(validate => validate(file))
+        if (!file[ERROR]) {
+          filteredFiles.push(file)
+        }
+      })
+      return applyUserProvidedSlices(filteredFiles)
     },
-    [customValidation, fileExtensionValidation, acceptableextensions],
+    [
+      customValidation,
+      fileExtensionValidation,
+      acceptableextensions,
+      applyUserProvidedSlices,
+    ],
   )
 
   const onDragEnterEvent = useCallback(event => {
@@ -110,33 +137,16 @@ export function useFileUpload({
     [],
   )
 
-  const applyUserProvidedSlices = useCallback(
-    files => {
-      let filePayload = []
-      if (multiple) {
-        if (filecountlimit) {
-          filePayload = [files.slice(0, filecountlimit)]
-        } else {
-          filePayload = [files]
-        }
-      } else {
-        filePayload = [files[0]]
-      }
-      return filePayload
-    },
-    [multiple, filecountlimit],
-  )
-
   const onDropEvent = useCallback(
     event => {
       const {dataTransfer} = event
       if (dataTransfer?.items?.length) {
         simpleAction(actionTypes.FILE_DROPPED, dispatch)
-        handleFiles(applyUserProvidedSlices(dataTransfer.files))
+        handleFiles(validateFileInput([...dataTransfer.files]))
         dataTransfer.clearData()
       }
     },
-    [handleFiles, applyUserProvidedSlices],
+    [handleFiles, validateFileInput],
   )
 
   const onClickEvent = useCallback(
@@ -193,9 +203,11 @@ export function useFileUpload({
     [multiple, acceptableextensions, filecountlimit, onChangeEvent],
   )
 
-  useEffect(() => {
-    files.length && files.map(file => validateFileInput(file))
-  }, [files, validateFileInput])
-
-  return [state, register, getDragDropContainerProps, getInputProps]
+  return [
+    state,
+    register,
+    getDragDropContainerProps,
+    getInputProps,
+    previewFiles,
+  ]
 }
