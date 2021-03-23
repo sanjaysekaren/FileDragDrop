@@ -30,17 +30,22 @@ export const dragDropReducer = (state, action) => {
         isDragging: false,
       }
     case actionTypes.ADD_FILES:
-      return {
-        ...state,
-        files: [
-          ...state.files,
-          ...action.payload.slice(0, state.filecountlimit - state.files.length),
-        ],
-      }
+      return updateState(state, action)
     default:
       return {
         isDragging: false,
       }
+  }
+}
+
+const updateState = (state, action) => {
+  console.log(action.payload)
+  return {
+    ...state,
+    files: [
+      ...state.files,
+      ...action.payload.slice(0, state.filecountlimit - state.files.length),
+    ],
   }
 }
 
@@ -107,10 +112,10 @@ export function useFileUpload({
         validators.push(fileExtensionValidation)
       }
       files?.map(file => {
-        validators.map(validate => validate(file))
-        if (!file[ERROR]) {
-          filteredFiles.push(file)
-        }
+        validators.map(validate => {
+          !file[ERROR] && validate(file)
+        })
+        !file[ERROR] && filteredFiles.push(file)
       })
       return applyUserProvidedSlices(filteredFiles)
     },
@@ -154,9 +159,10 @@ export function useFileUpload({
     [],
   )
 
-  const onChangeEvent = useCallback(event => handleFiles(event.target.files), [
-    handleFiles,
-  ])
+  const onChangeEvent = useCallback(
+    event => handleFiles(validateFileInput([...event.target.files])),
+    [handleFiles, validateFileInput],
+  )
 
   const getDragDropContainerProps = useCallback(
     ({

@@ -8,7 +8,7 @@ export function usePreviewFiles(files, previewCustomStyle) {
   const previewFiles = (
     <div>
       {files?.map(file => (
-        <span style={{display: 'inline-block'}}>
+        <span style={{display: 'inline-block'}} key={file.name}>
           <img
             className="preview"
             alt={file.name}
