@@ -1,4 +1,4 @@
-import {useEffect, useReducer, useRef, useCallback} from 'react'
+import {useReducer, useRef, useCallback} from 'react'
 
 const callfn = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
@@ -29,10 +29,7 @@ export const dragDropReducer = (state, action) => {
         isDragging: false,
       }
     case actionTypes.ADD_FILES:
-      return {
-        ...state,
-        files: [...state.files, ...action.payload],
-      }
+      return updateState(state, action)
     default:
       return {
         isDragging: false,
@@ -40,11 +37,21 @@ export const dragDropReducer = (state, action) => {
   }
 }
 
+const updateState = (state, action) => {
+  return {
+    ...state,
+    files: [
+      ...state.files,
+      ...action.payload.slice(0, state.filecountlimit - state.files.length),
+    ],
+  }
+}
+
 const defaultStyle = {
-  width: '100%',
-  height: '100%',
-  border: '0.05rem dashed gray',
-  borderRadius: '0.2rem',
+  width: '250px',
+  height: '400px',
+  border: '1px dashed gray',
+  borderRadius: '3px',
 }
 
 const defaultState = {
@@ -60,14 +67,23 @@ const simpleAction = (type, dispatch) => dispatch({type})
 export function useFileUpload({
   reducer = dragDropReducer,
   customValidation = () => {},
-  validate,
   ...props
 } = {}) {
   const {current: initialState} = useRef({...defaultState, ...props})
   const fileRef = useRef(null)
   const [state, dispatch] = useReducer(reducer, initialState)
-  const {files, multiple, filecountlimit, acceptableextensions} = state
+  const {
+    files,
+    multiple,
+    filecountlimit,
+    acceptableextensions,
+  } = state
   const register = ref => (fileRef.current = ref)
+
+  const applyUserProvidedSlices = useCallback(
+    newFiles => (multiple ? newFiles : [newFiles[0]]),
+    [multiple],
+  )
 
   const fileExtensionValidation = useCallback(
     file => {
@@ -84,15 +100,27 @@ export function useFileUpload({
   )
 
   const validateFileInput = useCallback(
-    file => {
+    files => {
+      let filteredFiles = []
       const validators = []
       validators.push(customValidation)
       if (acceptableextensions.length) {
         validators.push(fileExtensionValidation)
       }
-      validators.map(validate => !file[ERROR] && validate(file))
+      files?.map(file => {
+        validators.map(validate => {
+          !file[ERROR] && validate(file)
+        })
+        !file[ERROR] && filteredFiles.push(file)
+      })
+      return applyUserProvidedSlices(filteredFiles)
     },
-    [customValidation, fileExtensionValidation, acceptableextensions],
+    [
+      customValidation,
+      fileExtensionValidation,
+      acceptableextensions,
+      applyUserProvidedSlices,
+    ],
   )
 
   const onDragEnterEvent = useCallback(event => {
@@ -110,43 +138,27 @@ export function useFileUpload({
     [],
   )
 
-  const applyUserProvidedSlices = useCallback(
-    files => {
-      let filePayload = []
-      if (multiple) {
-        if (filecountlimit) {
-          filePayload = [files.slice(0, filecountlimit)]
-        } else {
-          filePayload = [files]
-        }
-      } else {
-        filePayload = [files[0]]
-      }
-      return filePayload
-    },
-    [multiple, filecountlimit],
-  )
-
   const onDropEvent = useCallback(
     event => {
       const {dataTransfer} = event
       if (dataTransfer?.items?.length) {
         simpleAction(actionTypes.FILE_DROPPED, dispatch)
-        handleFiles(applyUserProvidedSlices(dataTransfer.files))
+        handleFiles(validateFileInput([...dataTransfer.files]))
         dataTransfer.clearData()
       }
     },
-    [handleFiles, applyUserProvidedSlices],
+    [handleFiles, validateFileInput],
   )
 
   const onClickEvent = useCallback(
-    ({target}) => fileAttrId !== target.dataset?.id && fileRef.current.click(),
+    ({target}) => fileAttrId !== target.dataset?.id && fileRef.current?.click(),
     [],
   )
 
-  const onChangeEvent = useCallback(event => handleFiles(event.target.files), [
-    handleFiles,
-  ])
+  const onChangeEvent = useCallback(
+    event => handleFiles(validateFileInput([...event.target.files])),
+    [handleFiles, validateFileInput],
+  )
 
   const getDragDropContainerProps = useCallback(
     ({
@@ -193,9 +205,10 @@ export function useFileUpload({
     [multiple, acceptableextensions, filecountlimit, onChangeEvent],
   )
 
-  useEffect(() => {
-    files.length && files.map(file => validateFileInput(file))
-  }, [files, validateFileInput])
-
-  return [state, register, getDragDropContainerProps, getInputProps]
+  return [
+    state,
+    register,
+    getDragDropContainerProps,
+    getInputProps,
+  ]
 }

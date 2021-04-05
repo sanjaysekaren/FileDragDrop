@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import {useFileUpload} from './component'
+import UserForm from './example'
 
 const OnDrop = () => <span>Drop here</span>
 const Beforedrop = () => <span>Drop the file or click here to select</span>
@@ -15,17 +16,29 @@ const FileUpload = () => {
     register,
     getDragDropContainerProps,
     getInputProps,
-  ] = useFileUpload({
-    multiple: false,
-    acceptableextensions: ['pdf', 'jpeg', 'jpg'],
-    filecountlimit: 3,
-  })
-
+  ] = useFileUpload()
   console.log(files, 'files')
   return (
     <form onSubmit={onSubmit} action="">
-      <div {...getDragDropContainerProps()}>
-        <input ref={register} {...getInputProps()} />
+      <div
+        {...getDragDropContainerProps({
+          customStyle: {
+            backgroundColor: '#ccc',
+          },
+        })}
+      >
+        <input
+          ref={register}
+          {...getInputProps({
+            name: 'images',
+            multiple: true,
+            acceptableextensions: ['pdf', 'jpeg', 'jpg'],
+            filecountlimit: 3,
+            onChange: event => {
+              console.log(event)
+            },
+          })}
+        />
         {isDragging ? <OnDrop /> : <Beforedrop />}
       </div>
     </form>
@@ -35,7 +48,8 @@ const FileUpload = () => {
 ReactDOM.render(
   <React.StrictMode>
     <>
-      <FileUpload />
+      {/* <FileUpload /> */}
+      <UserForm />
     </>
   </React.StrictMode>,
   document.getElementById('root'),
