@@ -1,5 +1,5 @@
 import React from 'react'
-import {useFileUpload} from '../component'
+import {useFileUpload, usePreviewFiles} from '../component'
 import logo from '../resources/CloudUpload.jpg'
 import {
   Wrapper,
@@ -17,25 +17,26 @@ const validateFiles = file => {
   return file
 }
 
+const previewCustomStyle =  {
+  display: 'block',
+  width: '150px',
+  height: '200px',
+  margin: '5px',
+}
+
 const UserForm = () => {
   const [
     {isDragging, files},
     register,
     getDragDropContainerProps,
     getInputProps,
-    previewFiles,
   ] = useFileUpload({
     customValidation: validateFiles,
     multiple: true,
     filecountlimit: 3,
     acceptableextensions: ['pdf', 'jpg', 'jpeg'],
-    previewCustomStyle: {
-      display: 'block',
-      width: '150px',
-      height: '200px',
-      margin: '5px',
-    },
   })
+  const {previewFiles} = usePreviewFiles(files, previewCustomStyle)
 
   return (
     <div>

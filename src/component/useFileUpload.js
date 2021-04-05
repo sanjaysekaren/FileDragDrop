@@ -1,5 +1,4 @@
 import {useReducer, useRef, useCallback} from 'react'
-import {usePreviewFiles} from '../utlis/preview'
 
 const callfn = (...fns) => (...args) => fns.forEach(fn => fn?.(...args))
 
@@ -39,7 +38,6 @@ export const dragDropReducer = (state, action) => {
 }
 
 const updateState = (state, action) => {
-  console.log(action.payload)
   return {
     ...state,
     files: [
@@ -79,10 +77,8 @@ export function useFileUpload({
     multiple,
     filecountlimit,
     acceptableextensions,
-    previewCustomStyle,
   } = state
   const register = ref => (fileRef.current = ref)
-  const {previewFiles} = usePreviewFiles(files, previewCustomStyle)
 
   const applyUserProvidedSlices = useCallback(
     newFiles => (multiple ? newFiles : [newFiles[0]]),
@@ -214,6 +210,5 @@ export function useFileUpload({
     register,
     getDragDropContainerProps,
     getInputProps,
-    previewFiles,
   ]
 }
