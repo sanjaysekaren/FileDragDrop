@@ -1,6 +1,19 @@
 .DS_Store
 node_modules
-coverage
-build
 .idea/
 .vscode/
+
+# builds
+build
+dist
+artifacts
+.rpt2_cache
+coverage
+
+# misc
+
+npm-debug.log*
+.history
+size-plugin.json
+stats.html
+.vscode/settings.json

@@ -1,5 +1,5 @@
 import React from 'react'
-import {useFileUpload, usePreviewFiles} from '../component'
+import {useFileUpload, usePreviewFiles} from 'file-drag-drop'
 import logo from '../resources/CloudUpload.jpg'
 import {
   Wrapper,
@@ -10,7 +10,7 @@ import {
   SubmitButton,
   logoStyle,
   dropText,
-} from './custom.style'
+} from './App.style'
 
 const validateFiles = file => {
   file['error'] = ''
@@ -24,7 +24,7 @@ const previewCustomStyle =  {
   margin: '5px',
 }
 
-const UserForm = () => {
+const App = () => {
   const [
     {isDragging, files},
     register,
@@ -91,4 +91,4 @@ const UserForm = () => {
   )
 }
 
-export default UserForm
+export default App
