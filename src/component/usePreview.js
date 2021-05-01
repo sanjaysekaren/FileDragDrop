@@ -4,7 +4,7 @@ export function usePreviewFiles(files, previewCustomStyle) {
     width: '200px',
     height: '250px',
     margin: '5px',
-  }
+  };
   const previewFiles = (
     <div>
       {files?.map(file => (
@@ -19,6 +19,6 @@ export function usePreviewFiles(files, previewCustomStyle) {
         </span>
       ))}
     </div>
-  )
-  return {previewFiles}
+  );
+  return {previewFiles};
 }

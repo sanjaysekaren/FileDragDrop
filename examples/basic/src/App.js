@@ -1,5 +1,7 @@
 import React from 'react'
-import {useFileUpload, usePreviewFiles} from 'file-drag-drop'
+import {useFileUpload, usePreviewFiles} from '../../../src/component'
+// import {useFileUpload, usePreviewFiles} from 'react-drag-drop-hook'
+// import {useFileUpload, usePreviewFiles} from '../../../dist/react-drag-drop-hook.development'
 import logo from '../resources/CloudUpload.jpg'
 import {
   Wrapper,
@@ -40,7 +42,7 @@ const App = () => {
 
   return (
     <div>
-      <Wrapper>
+      {/* <Wrapper>
         <Title>User Example Form</Title>
         <FieldWrapper>
           <Label>UserName</Label>
@@ -86,9 +88,10 @@ const App = () => {
         <FieldWrapper>
           <SubmitButton>Submit</SubmitButton>
         </FieldWrapper>
-      </Wrapper>
+      </Wrapper> */}
+      sdfssadf
     </div>
   )
-}
+};
 
-export default App
+export default App;
