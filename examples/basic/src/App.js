@@ -1,7 +1,7 @@
 import React from 'react'
-import {useFileUpload, usePreviewFiles} from '../../../src/component'
+// import {useFileUpload, usePreviewFiles} from '../../../src/component'
 // import {useFileUpload, usePreviewFiles} from 'react-drag-drop-hook'
-// import {useFileUpload, usePreviewFiles} from '../../../dist/react-drag-drop-hook.development'
+import { useFileUpload, usePreviewFiles } from '../../../dist/react-drag-drop-hook.development'
 import logo from '../resources/CloudUpload.jpg'
 import {
   Wrapper,
@@ -19,7 +19,7 @@ const validateFiles = file => {
   return file
 }
 
-const previewCustomStyle =  {
+const previewCustomStyle = {
   display: 'block',
   width: '150px',
   height: '200px',
@@ -28,7 +28,7 @@ const previewCustomStyle =  {
 
 const App = () => {
   const [
-    {isDragging, files},
+    { isDragging, files },
     register,
     getDragDropContainerProps,
     getInputProps,
@@ -38,11 +38,11 @@ const App = () => {
     filecountlimit: 3,
     acceptableextensions: ['pdf', 'jpg', 'jpeg'],
   })
-  const {previewFiles} = usePreviewFiles(files, previewCustomStyle)
+  const { previewFiles } = usePreviewFiles(files, previewCustomStyle)
 
   return (
     <div>
-      {/* <Wrapper>
+      <Wrapper>
         <Title>User Example Form</Title>
         <FieldWrapper>
           <Label>UserName</Label>
@@ -88,8 +88,7 @@ const App = () => {
         <FieldWrapper>
           <SubmitButton>Submit</SubmitButton>
         </FieldWrapper>
-      </Wrapper> */}
-      sdfssadf
+      </Wrapper>
     </div>
   )
 };
