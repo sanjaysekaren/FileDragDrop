@@ -1,5 +1,5 @@
 import React from 'react'
-import {useFileUpload, usePreviewFiles} from 'file-drag-drop'
+import { useFileUpload, usePreviewFiles } from '../../../dist/react-drag-drop-hook.development'
 import logo from '../resources/CloudUpload.jpg'
 import {
   Wrapper,
@@ -17,7 +17,7 @@ const validateFiles = file => {
   return file
 }
 
-const previewCustomStyle =  {
+const previewCustomStyle = {
   display: 'block',
   width: '150px',
   height: '200px',
@@ -26,7 +26,7 @@ const previewCustomStyle =  {
 
 const App = () => {
   const [
-    {isDragging, files},
+    { isDragging, files },
     register,
     getDragDropContainerProps,
     getInputProps,
@@ -36,7 +36,7 @@ const App = () => {
     filecountlimit: 3,
     acceptableextensions: ['pdf', 'jpg', 'jpeg'],
   })
-  const {previewFiles} = usePreviewFiles(files, previewCustomStyle)
+  const { previewFiles } = usePreviewFiles(files, previewCustomStyle)
 
   return (
     <div>
@@ -89,6 +89,6 @@ const App = () => {
       </Wrapper>
     </div>
   )
-}
+};
 
-export default App
+export default App;

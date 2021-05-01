@@ -1,70 +1,93 @@
-# Getting Started with Create React App
+# react-drag-drop-hook
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Features
 
-## Available Scripts
+- File Select
+- File Drop and Drop
+- File Preview Configurable
+- Custom Validation
+- Custom UI & Style
 
-In the project directory, you can run:
+## Installation
 
-### `npm start`
+```sh
+yarn add react-drag-drop-hook
+# or
+npm i -s react-drag-drop-hook
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Basic Usage
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```js
+import React from 'react'
+import {useFileUpload, usePreviewFiles} from 'file-drag-drop'
 
-### `npm test`
+const App = () => {
+  const [
+    {isDragging, files},
+    register,
+    getDragDropContainerProps,
+    getInputProps,
+  ] = useFileUpload({
+    customValidation: validateFiles,
+    multiple: true,
+    filecountlimit: 3,
+    acceptableextensions: ['pdf', 'jpg', 'jpeg'],
+  })
+  const {previewFiles} = usePreviewFiles(files, previewCustomStyle)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  return (
+    <div>
+      <Wrapper>
+        <Title>User Example Form</Title>
+        <FieldWrapper>
+          <Label>UserName</Label>
+          <TextField placeholder="Enter user name"></TextField>
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>Location</Label>
+          <TextField placeholder="Enter location"></TextField>
+        </FieldWrapper>
+        <FieldWrapper>
+          <Label>Upload Proof</Label>
+          <FieldWrapper
+            id="dropContainer"
+            {...getDragDropContainerProps({
+              customStyle: {
+                backgroundColor: '#ffffff',
+                width: '450px',
+                height: '200px',
+                margin: '2% 30%',
+              },
+            })}
+          >
+            <label>
+              <img alt="logo" style={logoStyle} key={'icon'} src={logo} />
+              <input
+                ref={register}
+                {...getInputProps({
+                  name: 'images',
+                  multiple: true,
+                  acceptableextensions: ['pdf', 'jpeg', 'jpg'],
+                  customStyle: {
+                    visibility: 'hidden',
+                  },
+                })}
+              />
+            </label>
+            <div style={dropText}>
+              {isDragging ? 'Drop here' : 'Select or Drop a file'}
+            </div>
+          </FieldWrapper>
+        </FieldWrapper>
+        {previewFiles && previewFiles}
+        <FieldWrapper>
+          <SubmitButton>Submit</SubmitButton>
+        </FieldWrapper>
+      </Wrapper>
+    </div>
+  )
+}
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export default App
+```

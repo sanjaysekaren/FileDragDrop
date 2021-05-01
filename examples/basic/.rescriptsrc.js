@@ -6,7 +6,7 @@ const fixLinkedDependencies = config => {
     ...config.resolve,
     alias: {
       ...config.resolve.alias,
-      react$: resolveFrom(path.resolve('node_modules'), 'react'),
+      'react$': resolveFrom(path.resolve('node_modules'), 'react'),
       'react-dom$': resolveFrom(path.resolve('node_modules'), 'react-dom'),
     },
   }
